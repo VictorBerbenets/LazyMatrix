@@ -45,12 +45,11 @@ template<std::forward_iterator Iter>
     : n_column_ {n_column},
       n_line_ {n_line},
       capacity_ {n_line * n_column},
-      data_ {new value_type[capacity_]} {
+      data_ { std::make_shared<T[]>(capacity_) } {
         if (static_cast<size_type>(std::distance(begin, end)) != capacity_) {
-            delete [] data_;
             throw matrixExcepts::invalidInitMatrixSize();
         }
-        std::copy(begin, end, data_);
+        std::copy(begin, end, data_.get());
     }
 
     LazyMatrix(size_type n_line, size_type n_column, const T& aggregator = {})
@@ -58,7 +57,7 @@ template<std::forward_iterator Iter>
       n_line_ {n_line},
       capacity_ {n_line * n_column_},
       data_ {new value_type[capacity_]} {
-        std::fill(data_, data_ + capacity_, aggregator);
+        std::fill(data_.get(), data_.get() + capacity_, aggregator);
     }
 
     LazyMatrix(size_type n_line, size_type n_column, std::initializer_list<T> ls)
@@ -73,7 +72,6 @@ template<std::forward_iterator Iter>
       capacity_ { std::exchange(rhs.capacity_, 0) },
       n_line_   { std::exchange(rhs.n_line_, 0) }   {};
 
-    ~LazyMatrix() { delete[] data_; }
 
     LazyMatrix& operator=(const LazyMatrix& rhs) {
         if (this == std::addressof(rhs)) { return *this; };
@@ -129,11 +127,11 @@ template<std::forward_iterator Iter>
     }
 
     ProxyBracket operator[](size_type index1) {
-        return ProxyBracket(data_ + n_column_ * index1);
+        return ProxyBracket(data_.get() + n_column_ * index1);
     }
 
     const ProxyBracket operator[](size_type index1) const {
-        return ProxyBracket(data_ + n_column_ * index1);
+        return ProxyBracket(data_.get() + n_column_ * index1);
     }
 
     size_type nline() const noexcept { return n_line_; }
@@ -177,10 +175,10 @@ template<std::forward_iterator Iter>
         return *this;
     }
 
-    iterator begin() noexcept { return construct_iterator(data_); }
-    iterator end()   noexcept { return construct_iterator(data_ + capacity_); }
-    const_iterator cbegin() const noexcept { return iterator{data_}; }
-    const_iterator cend()   const noexcept { return iterator{data_ + capacity_}; }
+    iterator begin() noexcept { return construct_iterator(data_.get()); }
+    iterator end()   noexcept { return construct_iterator(data_.get() + capacity_); }
+    const_iterator cbegin() const noexcept { return construct_iterator(data_.get()); }
+    const_iterator cend()   const noexcept { return construct_iterator(data_.get() + capacity_); }
 
     auto determinant() const {
         if (!is_square()) { throw matrixExcepts::invalidDeterminantCall(); }
@@ -264,12 +262,12 @@ private:
     size_type n_column_;
     size_type n_line_;
     size_type capacity_;
-    pointer data_;
+    std::shared_ptr<value_type[]> data_;
 
     class ProxyBracket {
     public:
         ProxyBracket(pointer ptr) noexcept
-            : line_ptr_ {ptr} {}
+        : line_ptr_ {ptr} {}
 
         reference operator[](size_type index2) {
             return line_ptr_[index2];
@@ -284,7 +282,7 @@ private:
 
 }; // <--- class LazyMatrix
 
-template<typename T>
+template <typename T>
 LazyMatrix<T>::value_type LazyMatrix<T>::Gauss() { // Gauss algorithm
     auto m = *this;
     value_type determ_val {1};
@@ -309,7 +307,7 @@ LazyMatrix<T>::value_type LazyMatrix<T>::Gauss() { // Gauss algorithm
     return is_zero(result) ? value_type{0} : result;
 }
 
-template<typename T>
+template <typename T>
 LazyMatrix<T>::value_type LazyMatrix<T>::Bareiss() { // Bareiss algorithm
     auto m = *this;
     bool has_sign_changed {false};
@@ -332,42 +330,42 @@ LazyMatrix<T>::value_type LazyMatrix<T>::Bareiss() { // Bareiss algorithm
     return m[k][k] * (has_sign_changed ? -1 : 1);
 }
 
-template<typename T>
+template <typename T>
 bool operator==(const LazyMatrix<T>& lhs, const LazyMatrix<T>& rhs) {
     return lhs.size() == rhs.size() &&
            std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 }
 
-template<typename T>
+template <typename T>
 LazyMatrix<T> operator+(const LazyMatrix<T>& lhs, const LazyMatrix<T>& rhs) {
     auto copy = lhs;
     return copy += rhs;
 }
 
-template<typename T>
+template <typename T>
 LazyMatrix<T> operator-(const LazyMatrix<T>& lhs, const LazyMatrix<T>& rhs) {
     auto copy = lhs;
     return copy -= rhs;
 }
 
-template<typename T>
+template <typename T>
 LazyMatrix<T> operator*(const LazyMatrix<T>& lhs, typename LazyMatrix<T>::value_type coeff) {
     auto copy = lhs;
     return copy *= coeff;
 }
 
-template<typename T>
+template <typename T>
 LazyMatrix<T> operator*(typename LazyMatrix<T>::value_type coeff, const LazyMatrix<T>& rhs) {
     return rhs * coeff;
 }
 
-template<typename T>
+template <typename T>
 LazyMatrix<T> operator/(const LazyMatrix<T>& lhs, typename LazyMatrix<T>::value_type coeff) {
     auto copy = lhs;
     return copy /= coeff;
 }
 
-template<typename T>
+template <typename T>
 LazyMatrix<T> operator*(const LazyMatrix<T>& lhs, const LazyMatrix<T>& rhs) {
     using size_type = LazyMatrix<T>::size_type;
 
@@ -386,7 +384,7 @@ LazyMatrix<T> operator*(const LazyMatrix<T>& lhs, const LazyMatrix<T>& rhs) {
     return res;
 }
 
-template<typename T>
+template <typename T>
 std::ostream& operator<<(std::ostream& os, const LazyMatrix<T>& matrix) {
     using size_type = typename LazyMatrix<T>::size_type;
 

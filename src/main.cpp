@@ -8,5 +8,10 @@ int main() {
     for (auto&& val : a) {
         std::cout << val << std::endl;
     }
+
+    for (auto i = 0; i < 3; ++i) {
+        std::cout << a[i][i] << std::endl;
+    }
+    auto b = a[1][1];
 }
 
