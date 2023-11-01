@@ -41,7 +41,7 @@ private:
     using matrix_size = std::pair<size_type, size_type>;
     using line_info   = std::pair<IsZero, size_type>;
 public:
-/*----------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------------------------*/
     template<std::forward_iterator ForwIter>
     LazyMatrix(size_type n_line, size_type n_column, ForwIter begin, ForwIter end)
     : LazyMatrix(n_line, n_column) {

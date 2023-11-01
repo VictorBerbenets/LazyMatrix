@@ -18,4 +18,4 @@ enable_testing()
 
 find_package(Threads REQUIRED)
 
-#add_subdirectory(tests)
+add_subdirectory(tests)
