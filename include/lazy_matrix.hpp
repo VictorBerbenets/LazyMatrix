@@ -57,7 +57,7 @@ public:
       capacity_ {n_line * n_column_},
       data_ {new value_type[capacity_]} {
         std::fill(data_.get(), data_.get() + capacity_, aggregator);
-      }
+    }
 
     LazyMatrix(size_type n_line, size_type n_column, std::initializer_list<T> ls)
     : LazyMatrix(n_line, n_column, ls.begin(), ls.end()) {}
@@ -102,11 +102,13 @@ public:
         if (size() != rhs.size()) {
             throw matrixExcepts::invalidMatrixSubstraction();
         }
+        reconstruct();
         std::transform(cbegin(), cend(), rhs.cbegin(), begin(), std::minus<value_type>{});
         return *this;
     }
 
     LazyMatrix& operator*=(value_type coeff) {
+        reconstruct();
         std::transform( cbegin(), cend(), begin(), [&coeff](auto&& val) {
                                                      return std::multiplies<value_type>{}(val, coeff);
                                                  } );
@@ -117,6 +119,7 @@ public:
         if (is_zero(coeff)) {
             throw std::invalid_argument{"trying to divide by 0"};
         }
+        reconstruct();
         std::transform( cbegin(), cend(), begin(), [&coeff](auto&& val) {
                                                      return std::divides<value_type>{}(val, coeff);
                                                  } );
@@ -124,6 +127,7 @@ public:
     }
 
     ProxyBracket operator[](size_type index1) {
+        reconstruct();
         return ProxyBracket(data_.get() + n_column_ * index1);
     }
 
@@ -137,6 +141,8 @@ public:
     matrix_size size() const noexcept { return {n_line_, n_column_}; }
 
     void swap_lines(size_type id1, size_type id2) {
+        reconstruct();
+
         size_type offset1 = id1 * n_column_;
         size_type offset2 = id2 * n_column_;
         std::swap_ranges( begin() + offset1, begin() + (offset1 + n_column_),
@@ -151,6 +157,7 @@ public:
     }
 
     LazyMatrix& negate() & {
+        reconstruct();
         for (auto& val : *this) {
             val *= -1;
         }
@@ -158,6 +165,7 @@ public:
     }
 
     LazyMatrix& transpose() & {
+        reconstruct();
         if (is_square()) {
             return transpose_square();
         }
@@ -187,12 +195,20 @@ public:
         }
     }
 
-    iterator begin() noexcept { return construct_iterator(data_.get()); }
-    iterator end()   noexcept { return construct_iterator(data_.get() + capacity_); }
+    iterator begin() noexcept {
+        reconstruct();
+        return construct_iterator(data_.get());
+    }
+
+    iterator end() noexcept {
+        reconstruct();
+        return construct_iterator(data_.get() + capacity_);
+    }
+
     const_iterator cbegin() const noexcept { return construct_iterator(data_.get()); }
     const_iterator cend()   const noexcept { return construct_iterator(data_.get() + capacity_); }
-    reverse_iterator rbegin() const noexcept { return std::make_reverse_iterator(end()); }
-    reverse_iterator rend()   const noexcept { return std::make_reverse_iterator(begin()); }
+    reverse_iterator rbegin() noexcept { return std::make_reverse_iterator(end()); }
+    reverse_iterator rend()   noexcept { return std::make_reverse_iterator(begin()); }
     const_reverse_iterator crbegin() const noexcept { return std::make_reverse_iterator(cend()); }
     const_reverse_iterator crend()   const noexcept { return std::make_reverse_iterator(cbegin()); }
 private:
