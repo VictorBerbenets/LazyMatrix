@@ -20,7 +20,7 @@
 
 namespace yLAB {
 
-template<numeric_type T>
+template<my_concepts::numeric_type T>
 class LazyMatrix final {
 public:
     using size_type              = std::size_t;
@@ -169,7 +169,7 @@ public:
         if (is_square()) {
             return transpose_square();
         }
-        auto& m     = *this;
+        auto& m = *this;
         LazyMatrix copy = m;
         std::swap(m.n_line_, m.n_column_);
         for (size_type i = 0; i < n_line_; ++i) {

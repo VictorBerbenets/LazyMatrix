@@ -2,6 +2,8 @@
 
 #include <concepts>
 
+namespace my_concepts {
+
 template<typename T>
 concept numeric_type = std::copy_constructible<T> &&
                        std::copyable<T> &&
@@ -19,3 +21,4 @@ concept numeric_type = std::copy_constructible<T> &&
     { T {1} };
 };
 
+} // <--- namespace my_concepts

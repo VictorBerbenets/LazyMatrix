@@ -59,7 +59,7 @@ public:
         return ptr_ - rhs.ptr_;
     }
 
-    template <numeric_type> friend class LazyMatrix;
+    template <my_concepts::numeric_type> friend class LazyMatrix;
 private:
     pointer ptr_;
 }; // <--- class MatrixIterator
