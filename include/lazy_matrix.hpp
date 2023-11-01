@@ -23,15 +23,17 @@ namespace yLAB {
 template<numeric_type T>
 class LazyMatrix final {
 public:
-    using size_type        = std::size_t;
-    using value_type       = T;
-    using pointer          = T*;
-    using reference        = T&;
-    using const_value_type = const value_type;
-    using const_pointer    = const T*;
-    using const_reference  = const T&;
-    using iterator         = MatrixIterator<T>;
-    using const_iterator   = const MatrixIterator<T>;
+    using size_type              = std::size_t;
+    using value_type             = T;
+    using pointer                = T*;
+    using reference              = T&;
+    using const_value_type       = const value_type;
+    using const_pointer          = const T*;
+    using const_reference        = const T&;
+    using iterator               = MatrixIterator<T>;
+    using const_iterator         = const MatrixIterator<T>;
+    using reverse_iterator       = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 private:
     class ProxyBracket;
     enum class IsZero: bool {Zero, nZero};
@@ -40,7 +42,7 @@ private:
     using line_info   = std::pair<IsZero, size_type>;
 public:
 /*----------------------------------------------------------------------------*/
-template<std::forward_iterator Iter>
+    template<std::forward_iterator Iter>
     LazyMatrix(size_type n_line, size_type n_column, Iter begin, Iter end)
     : n_column_ {n_column},
       n_line_ {n_line},
@@ -175,11 +177,6 @@ template<std::forward_iterator Iter>
         return *this;
     }
 
-    iterator begin() noexcept { return construct_iterator(data_.get()); }
-    iterator end()   noexcept { return construct_iterator(data_.get() + capacity_); }
-    const_iterator cbegin() const noexcept { return construct_iterator(data_.get()); }
-    const_iterator cend()   const noexcept { return construct_iterator(data_.get() + capacity_); }
-
     auto determinant() const {
         if (!is_square()) { throw matrixExcepts::invalidDeterminantCall(); }
 
@@ -194,6 +191,15 @@ template<std::forward_iterator Iter>
             return m.Gauss();
         }
     }
+
+    iterator begin() noexcept { return construct_iterator(data_.get()); }
+    iterator end()   noexcept { return construct_iterator(data_.get() + capacity_); }
+    const_iterator cbegin() const noexcept { return construct_iterator(data_.get()); }
+    const_iterator cend()   const noexcept { return construct_iterator(data_.get() + capacity_); }
+    reverse_iterator rbegin() const noexcept { return std::make_reverse_iterator(end()); }
+    reverse_iterator rend() const noexcept { return std::make_reverse_iterator(begin()); }
+    const_reverse_iterator crbegin() const noexcept { return std::make_reverse_iterator(cend()); }
+    const_reverse_iterator crend() const noexcept { return std::make_reverse_iterator(cbegin()); }
 private:
     value_type Gauss(); /* Gauss algorithm */
     value_type Bareiss(); /* Bareiss algorithm */
