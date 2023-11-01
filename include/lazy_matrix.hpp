@@ -55,19 +55,24 @@ public:
     : n_column_ {n_column},
       n_line_ {n_line},
       capacity_ {n_line * n_column_},
-      data_ {new value_type[capacity_](aggregator)} {}
+      data_ {new value_type[capacity_]} {
+        std::fill(data_.get(), data_.get() + capacity_, aggregator);
+      }
 
     LazyMatrix(size_type n_line, size_type n_column, std::initializer_list<T> ls)
     : LazyMatrix(n_line, n_column, ls.begin(), ls.end()) {}
 
     LazyMatrix(const LazyMatrix& rhs)
-    : LazyMatrix(rhs.n_line_, rhs.n_column_, rhs.cbegin(), rhs.cend()) {}
+    : n_column_ {rhs.n_column_},
+      n_line_   {rhs.n_line_},
+      capacity_ {rhs.capacity_},
+      data_     {rhs.data_} {}
 
     LazyMatrix(LazyMatrix&& rhs)
-    : data_     { std::exchange(rhs.data_, nullptr) },
-      n_column_ { std::exchange(rhs.n_column_, 0) },
-      capacity_ { std::exchange(rhs.capacity_, 0) },
-      n_line_   { std::exchange(rhs.n_line_, 0) }   {};
+    : n_column_ { std::exchange(rhs.n_column_, 0)   },
+      n_line_   { std::exchange(rhs.n_line_, 0)     },
+      capacity_ { std::exchange(rhs.capacity_, 0)   },
+      data_     { std::exchange(rhs.data_, nullptr) } {}
 
 
     LazyMatrix& operator=(const LazyMatrix& rhs) {
@@ -88,6 +93,7 @@ public:
         if (size() != rhs.size()) {
             throw matrixExcepts::invalidMatrixAddition();
         }
+        reconstruct();
         std::transform(cbegin(), cend(), rhs.cbegin(), begin(), std::plus<value_type>{});
         return *this;
     }
@@ -239,6 +245,14 @@ private:
             }
         }
         return m;
+    }
+
+    void reconstruct() {
+        if (data_.unique()) { return ; }
+
+        auto save_ptr = data_.get();
+        data_.reset(new value_type[capacity_]);
+        std::copy(save_ptr, save_ptr + capacity_, data_.get());
     }
 
     iterator construct_iterator(pointer ptr) noexcept {
