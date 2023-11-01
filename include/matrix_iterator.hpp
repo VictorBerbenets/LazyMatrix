@@ -50,7 +50,6 @@ public:
     const_pointer operator->() const noexcept { return ptr_; }
     reference operator*() noexcept { return *ptr_; }
     pointer operator->() noexcept { return ptr_; }
-    
 
     bool operator==(MatrixIterator rhs) noexcept {
         return ptr_ == rhs.ptr_;

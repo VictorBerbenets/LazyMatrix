@@ -31,7 +31,7 @@ public:
     using const_pointer          = const T*;
     using const_reference        = const T&;
     using iterator               = MatrixIterator<T>;
-    using const_iterator         = const MatrixIterator<T>;
+    using const_iterator         = MatrixIterator<const T>;
     using reverse_iterator       = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 private:
@@ -42,25 +42,20 @@ private:
     using line_info   = std::pair<IsZero, size_type>;
 public:
 /*----------------------------------------------------------------------------*/
-    template<std::forward_iterator Iter>
-    LazyMatrix(size_type n_line, size_type n_column, Iter begin, Iter end)
-    : n_column_ {n_column},
-      n_line_ {n_line},
-      capacity_ {n_line * n_column},
-      data_ { std::make_shared<T[]>(capacity_) } {
+    template<std::forward_iterator ForwIter>
+    LazyMatrix(size_type n_line, size_type n_column, ForwIter begin, ForwIter end)
+    : LazyMatrix(n_line, n_column) {
         if (static_cast<size_type>(std::distance(begin, end)) != capacity_) {
             throw matrixExcepts::invalidInitMatrixSize();
         }
         std::copy(begin, end, data_.get());
     }
 
-    LazyMatrix(size_type n_line, size_type n_column, const T& aggregator = {})
+    LazyMatrix(size_type n_line, size_type n_column, const value_type& aggregator = {})
     : n_column_ {n_column},
       n_line_ {n_line},
       capacity_ {n_line * n_column_},
-      data_ {new value_type[capacity_]} {
-        std::fill(data_.get(), data_.get() + capacity_, aggregator);
-    }
+      data_ {new value_type[capacity_](aggregator)} {}
 
     LazyMatrix(size_type n_line, size_type n_column, std::initializer_list<T> ls)
     : LazyMatrix(n_line, n_column, ls.begin(), ls.end()) {}
@@ -85,13 +80,7 @@ public:
     }
 
     LazyMatrix& operator=(LazyMatrix&& rhs) {
-        delete[] data_;
-
-        data_     = std::exchange(rhs.data_, nullptr);
-        n_column_ = std::exchange(rhs.n_column_, 0);
-        capacity_ = std::exchange(rhs.capacity_, 0);
-        n_line_   = std::exchange(rhs.n_line_, 0);
-
+        swap(rhs);
         return *this;
     }
 
@@ -197,9 +186,9 @@ public:
     const_iterator cbegin() const noexcept { return construct_iterator(data_.get()); }
     const_iterator cend()   const noexcept { return construct_iterator(data_.get() + capacity_); }
     reverse_iterator rbegin() const noexcept { return std::make_reverse_iterator(end()); }
-    reverse_iterator rend() const noexcept { return std::make_reverse_iterator(begin()); }
+    reverse_iterator rend()   const noexcept { return std::make_reverse_iterator(begin()); }
     const_reverse_iterator crbegin() const noexcept { return std::make_reverse_iterator(cend()); }
-    const_reverse_iterator crend() const noexcept { return std::make_reverse_iterator(cbegin()); }
+    const_reverse_iterator crend()   const noexcept { return std::make_reverse_iterator(cbegin()); }
 private:
     value_type Gauss(); /* Gauss algorithm */
     value_type Bareiss(); /* Bareiss algorithm */
