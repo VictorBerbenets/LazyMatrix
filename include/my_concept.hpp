@@ -4,7 +4,7 @@
 
 namespace my_concepts {
 
-template<typename T>
+template <typename T>
 concept numeric_type = std::copy_constructible<T> &&
                        std::copyable<T> &&
                        requires(T item1, std::size_t n) {

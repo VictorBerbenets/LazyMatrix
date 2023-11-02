@@ -1,5 +1,4 @@
-#ifndef MATRIX_
-#define MATRIX_
+#pragma once
 
 #include <istream>
 #include <stdexcept>
@@ -20,7 +19,7 @@
 
 namespace yLAB {
 
-template<my_concepts::numeric_type T>
+template <my_concepts::numeric_type T>
 class LazyMatrix final {
 public:
     using size_type              = std::size_t;
@@ -42,7 +41,7 @@ private:
     using line_info   = std::pair<IsZero, size_type>;
 public:
 /*------------------------------------------------------------------------------------------------*/
-    template<std::forward_iterator ForwIter>
+    template <std::forward_iterator ForwIter>
     LazyMatrix(size_type n_line, size_type n_column, ForwIter begin, ForwIter end)
     : LazyMatrix(n_line, n_column) {
         if (static_cast<size_type>(std::distance(begin, end)) != capacity_) {
@@ -424,5 +423,3 @@ std::ostream& operator<<(std::ostream& os, const LazyMatrix<T>& matrix) {
 }
 
 } // <--- namespace yLAB
-
-#endif
