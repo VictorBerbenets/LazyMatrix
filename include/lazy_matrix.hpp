@@ -13,7 +13,7 @@
 #include <utility>
 
 #include "double_comparison.hpp"
-#include "my_concept.hpp"
+#include "my_concepts.hpp"
 #include "matrix_iterator.hpp"
 #include "exceptions.hpp"
 
@@ -308,7 +308,7 @@ private:
 
 template <typename T>
 LazyMatrix<T>::value_type LazyMatrix<T>::Gauss() { // Gauss algorithm
-    auto m = *this;
+    auto& m = *this;
     value_type determ_val {1};
     bool has_sign_changed {false};
     size_type id1 {0};
@@ -333,7 +333,7 @@ LazyMatrix<T>::value_type LazyMatrix<T>::Gauss() { // Gauss algorithm
 
 template <typename T>
 LazyMatrix<T>::value_type LazyMatrix<T>::Bareiss() { // Bareiss algorithm
-    auto m = *this;
+    auto& m = *this;
     bool has_sign_changed {false};
     value_type divider {1};
     size_type k {0};

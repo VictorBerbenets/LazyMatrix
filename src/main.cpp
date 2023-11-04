@@ -15,6 +15,7 @@ int main() {
     auto tmp2 = a;
     auto tmp3 = a;
     auto tmp4 = a;
+    tmp4.determinant();
     a.negate();
     auto tmp = a;
     a[1][1] = 5;

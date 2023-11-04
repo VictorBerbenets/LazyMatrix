@@ -2,7 +2,7 @@
 
 #include <iterator>
 
-#include "my_concept.hpp"
+#include "my_concepts.hpp"
 
 namespace yLAB {
 
@@ -16,6 +16,8 @@ public:
     using const_pointer     = const T*;
     using const_reference   = const T&;
     using difference_type   = int;
+
+    MatrixIterator() = default;
 
     MatrixIterator& operator+=(difference_type n) noexcept {
         ptr_ += n;
@@ -61,6 +63,10 @@ public:
     template <my_concepts::numeric_type> friend class LazyMatrix;
 private:
     pointer ptr_;
+
+    MatrixIterator(pointer ptr)
+    : ptr_ {ptr} {}
+
 }; // <--- class MatrixIterator
 
 
