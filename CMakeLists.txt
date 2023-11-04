@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 
 project(lazy_matrix)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 
 aux_source_directory(./src SRC_DIR)

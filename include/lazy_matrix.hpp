@@ -67,7 +67,7 @@ public:
       capacity_ {rhs.capacity_},
       data_     {rhs.data_} {}
 
-    LazyMatrix(LazyMatrix&& rhs)
+    LazyMatrix(LazyMatrix&& rhs) noexcept
     : n_column_ { std::exchange(rhs.n_column_, 0)   },
       n_line_   { std::exchange(rhs.n_line_, 0)     },
       capacity_ { std::exchange(rhs.capacity_, 0)   },
@@ -83,7 +83,7 @@ public:
         return *this;
     }
 
-    LazyMatrix& operator=(LazyMatrix&& rhs) {
+    LazyMatrix& operator=(LazyMatrix&& rhs) noexcept {
         swap(rhs);
         return *this;
     }
