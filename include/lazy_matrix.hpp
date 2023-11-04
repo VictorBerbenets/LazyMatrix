@@ -61,7 +61,7 @@ public:
     LazyMatrix(size_type n_line, size_type n_column, std::initializer_list<T> ls)
     : LazyMatrix(n_line, n_column, ls.begin(), ls.end()) {}
 
-    LazyMatrix(const LazyMatrix& rhs)
+    LazyMatrix(const LazyMatrix& rhs) noexcept
     : n_column_ {rhs.n_column_},
       n_line_   {rhs.n_line_},
       capacity_ {rhs.capacity_},
@@ -74,7 +74,7 @@ public:
       data_     { std::exchange(rhs.data_, nullptr) } {}
 
 
-    LazyMatrix& operator=(const LazyMatrix& rhs) {
+    LazyMatrix& operator=(const LazyMatrix& rhs) noexcept {
         if (this == std::addressof(rhs)) { return *this; };
 
         LazyMatrix tmp = rhs;
@@ -410,7 +410,7 @@ LazyMatrix<T> operator*(const LazyMatrix<T>& lhs, const LazyMatrix<T>& rhs) {
 
 template <typename T>
 std::ostream& operator<<(std::ostream& os, const LazyMatrix<T>& matrix) {
-    using size_type = typename LazyMatrix<T>::size_type;
+    using size_type = LazyMatrix<T>::size_type;
 
     auto [n_line, n_column] = matrix.size();
     for (size_type index1 = 0; index1 < n_line; ++index1) {
