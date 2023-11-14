@@ -56,7 +56,6 @@ public:
       capacity_ {n_line * n_column_},
       data_ {new value_type[capacity_]} {
         std::fill(data_.get(), data_.get() + capacity_, aggregator);
-        std::fill(begin(), end(), 1);
     }
 
     LazyMatrix(size_type n_line, size_type n_column, std::initializer_list<T> ls)
